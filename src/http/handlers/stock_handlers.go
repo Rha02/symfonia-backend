@@ -3,27 +3,27 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+)
 
-	"github.com/Rha02/symfonia-backend/src/models"
+const (
+	DEFAULT_LIMIT = 50
+	DEFAULT_SKIP  = 0
 )
 
 func (m *Repository) GetStocks(w http.ResponseWriter, r *http.Request) {
-	res := []models.Stock{
-		{
-			ID: 1, Symbol: "STCK1", Name: "Stock Test 1",
-		},
-		{
-			ID: 2, Symbol: "STCK2", Name: "Stock Test 2",
-		},
-		{
-			ID: 3, Symbol: "STIX", Name: "Dummy Stock Test",
-		},
-		{
-			ID: 4, Symbol: "TUSK", Name: "My Dummy Stock",
-		},
-		{
-			ID: 5, Symbol: "POS", Name: "Test Stock",
-		},
+	limit, err := getQueryIntParamOrDefault(r, "limit", DEFAULT_LIMIT)
+	if err != nil {
+		jsonError(w, http.StatusBadRequest, err.Error())
+	}
+
+	skip, err := getQueryIntParamOrDefault(r, "skip", DEFAULT_SKIP)
+	if err != nil {
+		jsonError(w, http.StatusBadRequest, err.Error())
+	}
+
+	res, err := m.DB.GetStocks(limit, skip)
+	if err != nil {
+		jsonError(w, http.StatusInternalServerError, "Failed to query database!")
 	}
 
 	w.Header().Set("Content-Type", "application/json")
