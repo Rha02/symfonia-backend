@@ -53,6 +53,7 @@ func newRouter() *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Get("/stocks", handlers.Repo.GetStocks)
+	r.Get("/stocks/search", handlers.Repo.SearchStock)
 
 	return r
 }

@@ -29,3 +29,16 @@ func (m *Repository) GetStocks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
 }
+
+func (m *Repository) SearchStock(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	searchKey := query.Get("value")
+
+	res, err := m.DB.SearchStock(searchKey)
+	if err != nil {
+		jsonError(w, http.StatusInternalServerError, "Failed to query database!")
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(res)
+}

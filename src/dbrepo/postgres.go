@@ -49,3 +49,40 @@ func (m *postgresdbRepo) GetStocks(limit int, skip int) (*[]models.Stock, error)
 
 	return &stocks, nil
 }
+
+// SearchStock implements [DatabaseRepository].
+func (m *postgresdbRepo) SearchStock(searchKey string) (*[]models.Stock, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	var stocks []models.Stock
+
+	stmt := `
+		SELECT id, symbol, name, created_at FROM stock
+		WHERE symbol ILIKE $1
+		OR name ILIKE $1
+		ORDER BY
+			CASE WHEN symbol ILIKE $1 THEN 0 ELSE 1 END
+		LIMIT $2;
+	`
+
+	searchKeyWildcard := "%" + searchKey + "%"
+	searchLimit := 5
+
+	rows, err := m.db.QueryContext(ctx, stmt, searchKeyWildcard, searchLimit)
+	if err != nil {
+		return &stocks, nil
+	}
+
+	for rows.Next() {
+		var stock models.Stock
+
+		if err := rows.Scan(&stock.ID, &stock.Symbol, &stock.Name, &stock.CreatedAt); err != nil {
+			return &stocks, err
+		}
+
+		stocks = append(stocks, stock)
+	}
+
+	return &stocks, nil
+}
