@@ -55,7 +55,7 @@ func (m *postgresdbRepo) SearchStock(searchKey string) (*[]models.Stock, error) 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	var stocks []models.Stock
+	stocks := make([]models.Stock, 0)
 
 	stmt := `
 		SELECT id, symbol, name, created_at FROM stock
@@ -71,7 +71,7 @@ func (m *postgresdbRepo) SearchStock(searchKey string) (*[]models.Stock, error) 
 
 	rows, err := m.db.QueryContext(ctx, stmt, searchKeyWildcard, searchLimit)
 	if err != nil {
-		return &stocks, nil
+		return &stocks, err
 	}
 
 	for rows.Next() {

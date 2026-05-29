@@ -14,16 +14,19 @@ func (m *Repository) GetStocks(w http.ResponseWriter, r *http.Request) {
 	limit, err := getQueryIntParamOrDefault(r, "limit", DEFAULT_LIMIT)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 
 	skip, err := getQueryIntParamOrDefault(r, "skip", DEFAULT_SKIP)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 
 	res, err := m.DB.GetStocks(limit, skip)
 	if err != nil {
 		jsonError(w, http.StatusInternalServerError, "Failed to query database!")
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -37,6 +40,7 @@ func (m *Repository) SearchStock(w http.ResponseWriter, r *http.Request) {
 	res, err := m.DB.SearchStock(searchKey)
 	if err != nil {
 		jsonError(w, http.StatusInternalServerError, "Failed to query database!")
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
