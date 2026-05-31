@@ -86,3 +86,21 @@ func (m *postgresdbRepo) SearchStock(searchKey string) (*[]models.Stock, error) 
 
 	return &stocks, nil
 }
+
+// GetStockBySymbol implements [DatabaseRepository].
+func (m *postgresdbRepo) GetStockBySymbol(symbol string) (*models.Stock, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	var stock models.Stock
+
+	stmt := `
+		SELECT id, symbol, name, created_at FROM stock
+		WHERE symbol = UPPER($1)
+	`
+
+	row := m.db.QueryRowContext(ctx, stmt, symbol)
+	err := row.Scan(&stock.ID, &stock.Symbol, &stock.Name, &stock.CreatedAt)
+
+	return &stock, err
+}
