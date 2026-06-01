@@ -61,3 +61,21 @@ func (m *Repository) GetStockBySymbol(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
 }
+
+func (m *Repository) GetStockTrend(w http.ResponseWriter, r *http.Request) {
+	symbol := chi.URLParam(r, "symbol")
+	if symbol == "" {
+		jsonError(w, http.StatusBadRequest, "Missing request parameter: symbol")
+		return
+	}
+	timeframe := chi.URLParam(r, "timeframe")
+	if timeframe == "" {
+		jsonError(w, http.StatusBadRequest, "Missing request parameter: timeframe")
+		return
+	}
+	limit := chi.URLParam(r, "limit")
+	if limit == "" {
+		jsonError(w, http.StatusBadRequest, "Missing request parameter: limit")
+		return
+	}
+}
