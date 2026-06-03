@@ -1,11 +1,13 @@
 package stocktrend
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/Rha02/symfonia-backend/src/models"
 )
@@ -17,17 +19,31 @@ type alpacaRepo struct {
 
 const alpacaURL = "https://data.alpaca.markets/v2"
 
+const timeout = 10 * time.Second
+
 func NewAlpacaRepo(apiKey string, apiSecret string) StockTrendRepository {
 	return &alpacaRepo{apiKey: apiKey, apiSecret: apiSecret}
 }
 
 // GetStockTrend implements [StockTrendRepository].
 func (a *alpacaRepo) GetStockTrend(symbol string, timeframe string, limit int, start string) (*[]models.AlpacaStockBar, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
 	uri := alpacaURL + "/stocks/bars"
 
-	res, err := http.Get(uri)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 	if err != nil {
-		log.Println("Error querying alpaca")
+		log.Println("Error creating request")
+		return nil, err
+	}
+	req.Header.Set("apca-api-key-id", a.apiKey)
+	req.Header.Set("apca-api-secret-key", a.apiSecret)
+
+	cli := &http.Client{}
+
+	res, err := cli.Do(req)
+	if err != nil {
+		log.Println("Error querying Alpaca", err)
 		return nil, err
 	}
 
