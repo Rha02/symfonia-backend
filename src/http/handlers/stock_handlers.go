@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -60,4 +62,42 @@ func (m *Repository) GetStockBySymbol(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
+}
+
+func (m *Repository) GetStockTrend(w http.ResponseWriter, r *http.Request) {
+	symbol := chi.URLParam(r, "symbol")
+	if symbol == "" {
+		jsonError(w, http.StatusBadRequest, "Missing request parameter: symbol")
+		return
+	}
+
+	query := r.URL.Query()
+
+	timeframe := query.Get("timeframe")
+	if timeframe == "" {
+		jsonError(w, http.StatusBadRequest, "Missing request parameter: timeframe")
+		return
+	}
+	limitStr := query.Get("limit")
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		jsonError(w, http.StatusBadRequest, "Failed to parse request paramenter: limit")
+		return
+	}
+
+	start := query.Get("start")
+	if start == "" {
+		jsonError(w, http.StatusBadRequest, "Missing request parameter: limit")
+		return
+	}
+
+	data, err := m.Alpaca.GetStockTrend(symbol, timeframe, limit, start)
+	if err != nil {
+		log.Println(err)
+		jsonError(w, http.StatusInternalServerError, "Failed to query Alpaca")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
 }
