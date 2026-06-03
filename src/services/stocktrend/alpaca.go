@@ -7,6 +7,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/Rha02/symfonia-backend/src/models"
@@ -29,9 +31,19 @@ func NewAlpacaRepo(apiKey string, apiSecret string) StockTrendRepository {
 func (a *alpacaRepo) GetStockTrend(symbol string, timeframe string, limit int, start string) (*[]models.AlpacaStockBar, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	uri := alpacaURL + "/stocks/bars"
+	uri, _ := url.Parse(alpacaURL + "/stocks/bars")
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
+	limitStr := strconv.Itoa(limit)
+
+	params := url.Values{}
+	params.Add("symbols", symbol)
+	params.Add("timeframe", timeframe)
+	params.Add("limit", limitStr)
+	params.Add("start", start)
+
+	uri.RawQuery = params.Encode()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri.String(), nil)
 	if err != nil {
 		log.Println("Error creating request")
 		return nil, err
