@@ -21,3 +21,11 @@ type AlpacaStockBar struct {
 	TradeCount   int     `json:"n"`
 	AveragePrice float32 `json:"vw"`
 }
+
+type AlpacaPortfolioResponse struct {
+	Timestamp      []int     `json:"timestamp"`
+	Equity         []float32 `json:"equity"`
+	ProfitLoss     []float32 `json:"profit_loss"`
+	ProfitListtPct []float32 `json:"profit_loss_pct"`
+	BaseValue      float32   `json:"base_value"`
+}
