@@ -101,3 +101,23 @@ func (m *Repository) GetStockTrend(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }
+
+func (m *Repository) GetPortfolioTrend(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+
+	period := query.Get("period")
+	if period == "" {
+		jsonError(w, http.StatusBadRequest, "Missing request parameter: period")
+		return
+	}
+
+	data, err := m.Alpaca.GetPortfolioTrend(period)
+	if err != nil {
+		log.Println(err)
+		jsonError(w, http.StatusInternalServerError, "Failed to query Alpaca")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}

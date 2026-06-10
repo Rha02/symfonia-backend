@@ -69,5 +69,7 @@ func newRouter() *chi.Mux {
 	r.Get("/stocks/{symbol}", handlers.Repo.GetStockBySymbol)
 	r.Get("/stocks/{symbol}/trend", handlers.Repo.GetStockTrend)
 
+	r.Get("/portfolio/trend", handlers.Repo.GetPortfolioTrend)
+
 	return r
 }
