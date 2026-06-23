@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -77,7 +78,7 @@ func (a *alpacaRepo) GetStockTrend(symbol string, timeframe string, limit int, s
 
 	data, ok := resBody.Bars[symbol]
 	if !ok {
-		log.Printf("Error, no trend data for ")
+		log.Printf("Error, no trend data for %s", symbol)
 		return nil, errors.New("missing data for symbol")
 	}
 
@@ -122,6 +123,45 @@ func (a *alpacaRepo) GetPortfolioTrend(period string) (*models.AlpacaPortfolioRe
 	var resBody *models.AlpacaPortfolioResponse
 
 	err = json.Unmarshal(body, &resBody)
+	if err != nil {
+		log.Println("Error unmarshalling json")
+		return nil, err
+	}
+
+	return resBody, nil
+}
+
+// GetStockLatest implements [StockTrendRepository].
+func (a *alpacaRepo) GetStockLatest(symbol string) (*models.AlpacaLatestStockBar, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	uri, _ := url.Parse(fmt.Sprintf("%s/stocks/%s/bars", marketURL, symbol))
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri.String(), nil)
+	if err != nil {
+		log.Println("Error creating request")
+		return nil, err
+	}
+	req.Header.Set("apca-api-key-id", a.apiKey)
+	req.Header.Set("apca-api-secret-key", a.apiSecret)
+
+	cli := &http.Client{}
+	res, err := cli.Do(req)
+	if err != nil {
+		log.Println("Error querying Alpaca", err)
+		return nil, err
+
+	}
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Println("Error reading response body")
+		return nil, err
+	}
+
+	var resBody *models.AlpacaLatestStockBar
+	err = json.Unmarshal(body, resBody)
 	if err != nil {
 		log.Println("Error unmarshalling json")
 		return nil, err

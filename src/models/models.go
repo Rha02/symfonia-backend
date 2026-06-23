@@ -23,9 +23,14 @@ type AlpacaStockBar struct {
 }
 
 type AlpacaPortfolioResponse struct {
-	Timestamp      []int     `json:"timestamp"`
-	Equity         []float32 `json:"equity"`
-	ProfitLoss     []float32 `json:"profit_loss"`
-	ProfitListtPct []float32 `json:"profit_loss_pct"`
-	BaseValue      float32   `json:"base_value"`
+	Timestamp     []int     `json:"timestamp"`
+	Equity        []float32 `json:"equity"`
+	ProfitLoss    []float32 `json:"profit_loss"`
+	ProfitLossPct []float32 `json:"profit_loss_pct"`
+	BaseValue     float32   `json:"base_value"`
+}
+
+type AlpacaLatestStockBar struct {
+	Symbol string         `json:"symbol"`
+	Bar    AlpacaStockBar `json:"bar"`
 }
