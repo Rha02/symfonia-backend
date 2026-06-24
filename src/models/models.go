@@ -1,10 +1,11 @@
 package models
 
 type Stock struct {
-	ID        int    `json:"id"`
-	Symbol    string `json:"symbol"`
-	Name      string `json:"name"`
-	CreatedAt string `json:"created_at"`
+	ID        int     `json:"id"`
+	Symbol    string  `json:"symbol"`
+	Name      string  `json:"name"`
+	CreatedAt string  `json:"created_at"`
+	LastPrice float32 `json:"last_price"`
 }
 
 type AlpacaBarsResponse struct {

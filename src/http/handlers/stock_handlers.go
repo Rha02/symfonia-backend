@@ -54,14 +54,23 @@ func (m *Repository) SearchStock(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) GetStockBySymbol(w http.ResponseWriter, r *http.Request) {
 	symbol := chi.URLParam(r, "symbol")
 
-	res, err := m.DB.GetStockBySymbol(symbol)
+	stock, err := m.DB.GetStockBySymbol(symbol)
 	if err != nil {
 		jsonError(w, http.StatusInternalServerError, "Failed to query database!")
 		return
 	}
 
+	latestBar, err := m.Alpaca.GetStockLatest(symbol)
+	if err != nil {
+		log.Println(err)
+		jsonError(w, http.StatusInternalServerError, "Failed to query Alpaca!")
+		return
+	}
+
+	stock.LastPrice = latestBar.Bar.ClosingPrice
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
+	json.NewEncoder(w).Encode(stock)
 }
 
 func (m *Repository) GetStockTrend(w http.ResponseWriter, r *http.Request) {
