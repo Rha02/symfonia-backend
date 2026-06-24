@@ -136,7 +136,7 @@ func (a *alpacaRepo) GetStockLatest(symbol string) (*models.AlpacaLatestStockBar
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	uri, _ := url.Parse(fmt.Sprintf("%s/stocks/%s/bars", marketURL, symbol))
+	uri, _ := url.Parse(fmt.Sprintf("%s/stocks/%s/bars/latest", marketURL, symbol))
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri.String(), nil)
 	if err != nil {
@@ -161,7 +161,7 @@ func (a *alpacaRepo) GetStockLatest(symbol string) (*models.AlpacaLatestStockBar
 	}
 
 	var resBody *models.AlpacaLatestStockBar
-	err = json.Unmarshal(body, resBody)
+	err = json.Unmarshal(body, &resBody)
 	if err != nil {
 		log.Println("Error unmarshalling json")
 		return nil, err
